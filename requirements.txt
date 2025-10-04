@@ -1,0 +1,12 @@
+fastapi==0.109.2
+uvicorn[standard]==0.22.0
+python-multipart==0.0.6
+PyPDF2==3.0.1
+pydantic
+python-dateutil==2.8.2
+email-validator>=2.0
+python-multipart==0.0.6
+PyPDF2
+pdfplumber==0.10.3
+pandas==2.0.3
+numpy==1.24.3

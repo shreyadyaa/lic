@@ -1,0 +1,66 @@
+1. Architecture of Apache Airflow & Interaction in Docker
+
+Scheduler:
+Continuously monitors DAGs and determines which tasks need to run.
+Pushes the tasks into a queue (depends on the executor used).
+
+Executor:
+The component responsible for running tasks.
+It decides how tasks are distributed and executed: locally, in parallel, or across multiple workers.
+Examples: SequentialExecutor, LocalExecutor, CeleryExecutor, KubernetesExecutor.
+
+Worker:
+Executes the actual task instances.
+Can run locally (LocalExecutor) or distributed across multiple machines (CeleryExecutor).
+
+Interaction in Docker Setup:
+
+Each component usually runs in a separate container.
+
+Scheduler container → Monitors DAGs → pushes tasks to Executor.
+Executor container → Sends tasks to Workers.
+Worker container(s) → Pick up tasks from the queue (like RabbitMQ/Redis) and execute them.
+
+Metadata Database (Postgres/MySQL container) stores DAG states, task instances, logs, and other metadata.
+
+
+2.
+ It outlines the tasks that are performed, their sequence, and their timetable.
+
+ Essential elements of a DAG file:
+
+Imports: Include required Airflow classes and operators along with any Python modules.
+
+Default Arguments: Define default behavior for tasks such as retries, start date, and dependencies on past tasks.
+
+DAG Definition: The DAG object itself defines the workflow, its schedule, and description.
+
+Tasks/Operators: Define individual tasks and their operations. Operators specify the type of task to execute.
+
+Task Dependencies: Specify the order in which tasks should execute.
+
+ 3. Metadata persistence: Use a database container (like Postgres or MySQL) with volumes mapped to host storage to store DAG states, task instances, and logs references.
+
+Log persistence: Map the Airflow logs folder to the host machine so logs remain available even if containers restart.
+
+Importance: Persistence ensures that task history and logs are not lost on container restart, which is critical for debugging, monitoring, and maintaining workflow consistency.
+
+4. LocalExecutor: Runs tasks in parallel on the same machine. Suitable for small workflows or single-container setups.
+
+CeleryExecutor: Distributes tasks across multiple worker containers using a message broker like Redis or RabbitMQ. Suitable for large workflows that require horizontal scaling.
+
+When to use which in Docker: LocalExecutor is simpler for development or testing, whereas CeleryExecutor is preferred in production for high availability and scalability.
+
+5. The docker-compose.yaml file defines how Airflow components run as Docker containers. It specifies container services, networks, volumes, and environment variables, enabling multi-container orchestration.
+
+Common services in this file:
+
+Airflow Webserver: Provides the UI to monitor DAGs and tasks.
+
+Scheduler: Monitors DAGs and schedules tasks.
+
+Worker(s): Execute tasks, especially for CeleryExecutor setups.
+
+Database: Stores metadata such as DAG states and task instances.
+
+Message Broker: Required for CeleryExecutor (e.g., Redis or RabbitMQ).
